@@ -1,32 +1,46 @@
-# React + TypeScript + Vite
+# Expiry Day
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An interactive explainer of the strategy SEBI alleged Jane Street used on Bank Nifty expiry days, plus a 28 slide deck.
 
-Currently, two official plugins are available:
+Everything is a simplified teaching simulation. Real figures come from SEBI's interim order of 3 July 2025, which is under appeal. Nothing here is a finding of guilt or financial advice.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run the website
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Open http://localhost:5173.
+
+## Tests (simulation invariants)
+
+```bash
+npm test
+```
+
+## Build for hosting
+
+```bash
+npm run build
+```
+
+`dist/` is a static site. Drop it on GitHub Pages, Netlify or Vercel. `base` is set to `./` so it works under any sub-path.
+
+Quick GitHub Pages recipe: push this repo, then in the repo settings enable Pages from a GitHub Action, or install `gh-pages` and run `npx gh-pages -d dist`.
+
+## Rebuild the deck
+
+```bash
+npm run deck
+```
+
+Writes `deck/Jane_Street_Expiry_Day.pptx` and copies it to your Downloads folder. The script fails if it finds any en or em dash or if the slide count is not 28.
+
+## Layout
+
+- `src/sim/` the market model: price impact, option pricing, P&L, clock. Pure TypeScript, no React.
+- `src/store/game.ts` a Zustand store factory so the guided replay and the sandbox each get their own market.
+- `src/components/` one component per section of the page.
+- `src/data/facts.ts` every real number with a paragraph reference to the SEBI order.
+- `deck/` pptxgenjs generator and the shared data file.

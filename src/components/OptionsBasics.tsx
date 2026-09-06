@@ -45,6 +45,9 @@ export function OptionsBasics() {
             {pnl > 0 ? '+' : ''}
             {Math.round(pnl)} points on {paid} paid
           </div>
+          {Math.abs(index - STRIKE) < 50 && (
+            <div className="text-sm text-mute">Index has not moved, but the option already lost value. Options melt as the day passes. On expiry day they melt fast.</div>
+          )}
           <Callout tone="blue">
             {kind === 'call'
               ? 'A call pays you the amount the index finishes ABOVE the strike. Below the strike it is worth nothing. The most you can lose is the premium.'
