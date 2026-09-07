@@ -60,8 +60,8 @@ export function Sandbox() {
       <p className="mb-6 max-w-3xl text-mute">
         A fresh, random expiry day. Bank Nifty starts at 50,000, you have ₹10 lakh, and you are big enough to move the market. Press play, then buy, sell, and bet. Can you beat the honest trader who just buys at the open and holds?
       </p>
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="card p-4 md:p-6">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="card min-w-0 p-3 sm:p-4 md:p-6">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-3">
               <Big tone={dir === 'flat' ? 'neutral' : dir} className="!text-4xl">
@@ -69,7 +69,7 @@ export function Sandbox() {
               </Big>
               <Arrow dir={dir} size={36} />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="num text-2xl font-black">{tickToTime(s.tick)}</span>
               <button className={`btn ${g.playing ? 'btn-ghost' : 'btn-accent'}`} onClick={() => g.setPlaying(!g.playing)} disabled={s.settled}>
                 {g.playing ? 'Pause' : s.tick === 0 ? 'Play' : 'Resume'}

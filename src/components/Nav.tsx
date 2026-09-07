@@ -30,7 +30,7 @@ export function Nav() {
   }, [])
   return (
     <nav className="sticky top-0 z-40 border-b border-line bg-ink/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 text-sm">
+      <div className="no-scrollbar mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-3 py-2 text-sm">
         <a href="#top" className="mr-3 whitespace-nowrap font-black text-accent">
           Expiry Day
         </a>

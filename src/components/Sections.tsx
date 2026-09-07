@@ -14,17 +14,30 @@ export function Comparison() {
   ]
   return (
     <Section id="compare" eyebrow="Step 7" title="Normal trader vs the alleged strategy">
-      <div className="card overflow-hidden">
-        <div className="grid grid-cols-[110px_1fr_1fr] bg-panel2 text-xs font-bold uppercase tracking-wider text-mute md:grid-cols-[160px_1fr_1fr]">
+      {/* Wide screens: a three column table */}
+      <div className="card hidden overflow-hidden md:block">
+        <div className="grid grid-cols-[160px_1fr_1fr] bg-panel2 text-xs font-bold uppercase tracking-wider text-mute">
           <div className="p-3"></div>
           <div className="p-3 text-blue">Normal trader</div>
           <div className="p-3 text-accent">What SEBI alleges</div>
         </div>
         {rows.map(([k, a, b]) => (
-          <div key={k} className="grid grid-cols-[110px_1fr_1fr] border-t border-line text-sm md:grid-cols-[160px_1fr_1fr] md:text-base">
+          <div key={k} className="grid grid-cols-[160px_1fr_1fr] border-t border-line text-base">
             <div className="p-3 font-bold">{k}</div>
             <div className="p-3 text-mute">{a}</div>
             <div className="p-3">{b}</div>
+          </div>
+        ))}
+      </div>
+      {/* Phones: one card per row */}
+      <div className="space-y-3 md:hidden">
+        {rows.map(([k, a, b]) => (
+          <div key={k} className="card p-4">
+            <div className="mb-2 text-lg font-black">{k}</div>
+            <div className="mb-1 text-xs font-bold uppercase tracking-wider text-blue">Normal trader</div>
+            <div className="mb-3 text-sm text-mute">{a}</div>
+            <div className="mb-1 text-xs font-bold uppercase tracking-wider text-accent">What SEBI alleges</div>
+            <div className="text-sm">{b}</div>
           </div>
         ))}
       </div>

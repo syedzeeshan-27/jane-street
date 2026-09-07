@@ -3,21 +3,21 @@ import { formatRupees, type Pnl } from '../sim/market'
 import { Money } from './ui'
 
 export function PnlPanel({ pnl, stockValue, big = false }: { pnl: Pnl; stockValue?: number; big?: boolean }) {
-  const size = big ? 'text-3xl md:text-5xl' : 'text-2xl md:text-3xl'
+  const size = big ? 'text-2xl sm:text-3xl md:text-5xl' : 'text-lg sm:text-2xl md:text-3xl'
   const tiles = [
     { label: 'Stocks P&L', value: pnl.underlying, hint: stockValue !== undefined ? `holding ${formatRupees(stockValue)}` : undefined },
     { label: 'Options P&L', value: pnl.options, hint: `bet size ${formatRupees(pnl.notional)}` },
     { label: 'Net', value: pnl.net, hint: 'what you actually made' },
   ]
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {tiles.map((t, i) => (
-        <motion.div key={t.label} layout className={`card p-4 ${i === 2 ? 'border-accent/60' : ''}`}>
-          <div className="text-xs font-bold uppercase tracking-wider text-mute">{t.label}</div>
-          <div className={`font-black ${size}`}>
+        <motion.div key={t.label} layout className={`card p-2.5 sm:p-4 ${i === 2 ? 'border-accent/60' : ''}`}>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-mute sm:text-xs">{t.label}</div>
+          <div className={`font-black break-words ${size}`}>
             <Money value={t.value} />
           </div>
-          {t.hint && <div className="mt-1 text-xs text-mute">{t.hint}</div>}
+          {t.hint && <div className="mt-1 hidden text-xs text-mute sm:block">{t.hint}</div>}
         </motion.div>
       ))}
     </div>

@@ -125,8 +125,8 @@ export function GuidedReplay() {
         . It is not a reconstruction of real trades. Numbers are scaled down about 1 crore times and are illustrative, not real. SEBI's order is an interim finding that Jane Street is contesting on appeal.
       </Callout>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="card p-4 md:p-6">
+      <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="card min-w-0 p-3 sm:p-4 md:p-6">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="text-xs font-bold uppercase tracking-wider text-mute">Bank Nifty, {jan17.date} (illustrative)</div>
