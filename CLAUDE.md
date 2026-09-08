@@ -8,3 +8,4 @@ Vite + React + TS site in `src/`, pptxgenjs deck in `deck/`. `npm run dev`, `npm
 - Writing several files in one Bash heredoc chain fails silently on this Windows Git Bash (unmatched quote parse error); use the Write tool per file.
 - Vitest here swallows console.log; write probe output to a file instead.
 - The pptx skill's `soffice.py` cannot run on Windows (AF_UNIX). Render slides with PowerPoint COM: `$app = New-Object -ComObject PowerPoint.Application; $pres.Export(dir, "PNG", 1600, 900)`.
+- Game actions must never fail silently. The sandbox refused "Buy put/call" with no message when cash was 0; every refused action now sets a visible notice. Rule: any rejected user action shows why.
