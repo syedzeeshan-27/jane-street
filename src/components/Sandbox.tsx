@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import { tickToTime } from '../sim/clock'
-import { formatRupees, honestTraderPnl, LOT_SIZE, MAX_LOTS, optionPrice, pnl as calcPnl } from '../sim/market'
+import { formatRupees, honestTraderPnl, LOT_SIZE, MAX_LOTS, optionPremium, optionPrice, optionTradeProblem, pnl as calcPnl } from '../sim/market'
 import { createGameStore } from '../store/game'
 import { IndexChart } from './IndexChart'
 import { PnlPanel, SizeBars } from './PnlPanel'
@@ -54,12 +54,27 @@ export function Sandbox() {
   const usedLots = Math.abs(s.callLots) + Math.abs(s.putLots)
   const callPx = optionPrice(s, 'call')
   const putPx = optionPrice(s, 'put')
+  const buyPutCost = optionPremium(s, 'put', lots)
+  const buyCallCost = optionPremium(s, 'call', lots)
+  const canBuyPut = optionTradeProblem(s, 'put', lots) === null
+  const canBuyCall = optionTradeProblem(s, 'call', lots) === null
+  const canSellCall = optionTradeProblem(s, 'call', -lots) === null
+  const canSellPut = optionTradeProblem(s, 'put', -lots) === null
 
   return (
     <Section id="sandbox" eyebrow="Step 6" title="Now try it yourself">
-      <p className="mb-6 max-w-3xl text-mute">
+      <p className="mb-4 max-w-3xl text-mute">
         A fresh, random expiry day. Bank Nifty starts at 50,000, you have ₹10 lakh, and you are big enough to move the market. Press play, then buy, sell, and bet. Can you beat the honest trader who just buys at the open and holds?
       </p>
+      <div className="card mb-6 p-4 md:p-5">
+        <div className="mb-2 text-xs font-bold uppercase tracking-wider text-accent">The recipe SEBI described, in four clicks</div>
+        <ol className="grid gap-2 text-sm text-mute md:grid-cols-4">
+          <li><b className="text-up">1. Buy stocks</b> with about half your cash. The index jumps. Keep the rest as cash for the next step.</li>
+          <li><b className="text-accent">2. Buy puts and sell calls</b> right away, while puts are cheap and calls are expensive. Bet bigger than your stocks.</li>
+          <li><b className="text-mute">3. Wait</b> until about 11:45. Watch other traders keep the index up.</li>
+          <li><b className="text-down">4. Sell all stocks</b> in a few big orders. The index drops. Let the clock run to 15:30.</li>
+        </ol>
+      </div>
       <div className="grid min-w-0 gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="card min-w-0 p-3 sm:p-4 md:p-6">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -121,22 +136,20 @@ export function Sandbox() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <button className="btn btn-ghost" onClick={() => g.option('put', lots)} disabled={s.settled}>
-                Buy put (bet on fall)
-              </button>
-              <button className="btn btn-ghost" onClick={() => g.option('call', -lots)} disabled={s.settled}>
-                Sell call (bet on fall)
-              </button>
-              <button className="btn btn-ghost" onClick={() => g.option('call', lots)} disabled={s.settled}>
-                Buy call (bet on rise)
-              </button>
-              <button className="btn btn-ghost" onClick={() => g.option('put', -lots)} disabled={s.settled}>
-                Sell put (bet on rise)
-              </button>
+              <OptBtn label="Buy put" sub={`bet on fall, pay ${formatRupees(buyPutCost)}`} ok={canBuyPut} onClick={() => g.option('put', lots)} />
+              <OptBtn label="Sell call" sub={`bet on fall, receive ${formatRupees(-optionPremium(s, 'call', -lots))}`} ok={canSellCall} onClick={() => g.option('call', -lots)} />
+              <OptBtn label="Buy call" sub={`bet on rise, pay ${formatRupees(buyCallCost)}`} ok={canBuyCall} onClick={() => g.option('call', lots)} />
+              <OptBtn label="Sell put" sub={`bet on rise, receive ${formatRupees(-optionPremium(s, 'put', -lots))}`} ok={canSellPut} onClick={() => g.option('put', -lots)} />
             </div>
             <div className="text-xs text-mute">
-              Using {usedLots} of {MAX_LOTS} lots. Puts {s.putLots}, calls {s.callLots}. A negative number means you sold.
+              Using {usedLots} of {MAX_LOTS} lots. Puts {s.putLots}, calls {s.callLots}. A negative number means you sold. Buying costs premium from your cash; selling pays you premium.
             </div>
+            {g.notice && (
+              <div className="rounded-lg border border-down/60 bg-down/10 px-3 py-2 text-sm">
+                {g.notice}
+                <button className="ml-2 underline" onClick={g.clearNotice}>ok</button>
+              </div>
+            )}
           </div>
 
           <div className="card p-6">
@@ -173,6 +186,15 @@ export function Sandbox() {
         )}
       </AnimatePresence>
     </Section>
+  )
+}
+
+function OptBtn({ label, sub, ok, onClick }: { label: string; sub: string; ok: boolean; onClick: () => void }) {
+  return (
+    <button className={`btn flex flex-col items-center px-2 py-2 ${ok ? 'btn-ghost' : 'btn-ghost opacity-50'}`} onClick={onClick} title={ok ? '' : 'Click to see why this is not possible right now'}>
+      <span>{label}</span>
+      <span className="num text-[11px] font-normal text-mute">{sub}</span>
+    </button>
   )
 }
 

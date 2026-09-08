@@ -165,14 +165,27 @@ export function optionPrice(s: SimState, kind: OptionKind): number {
   return kind === 'call' ? callPrice(s.index, s.strike, s.tick) : putPrice(s.index, s.strike, s.tick)
 }
 
-/** Buy (lots > 0) or sell (lots < 0) option lots. Options are so liquid the player cannot move their price. */
-export function tradeOption(s: SimState, kind: OptionKind, lots: number, label?: string): SimState {
-  if (s.settled || lots === 0) return s
+/** Rupees paid (positive) or received (negative) for an option trade. */
+export function optionPremium(s: SimState, kind: OptionKind, lots: number): number {
+  return optionPrice(s, kind) * LOT_SIZE * lots
+}
+
+/** Why an option trade would be refused, or null if it is allowed. */
+export function optionTradeProblem(s: SimState, kind: OptionKind, lots: number): string | null {
+  if (s.settled) return 'The day is over. Press Reset to play again.'
+  if (lots === 0) return null
   const current = kind === 'call' ? s.callLots : s.putLots
   const other = kind === 'call' ? s.putLots : s.callLots
-  if (Math.abs(current + lots) + Math.abs(other) > MAX_LOTS) return s
-  const premium = optionPrice(s, kind) * LOT_SIZE * lots // rupees paid (negative = received)
-  if (premium > s.cash) return s
+  if (Math.abs(current + lots) + Math.abs(other) > MAX_LOTS) return `That would take you past the ${MAX_LOTS} lot limit.`
+  const premium = optionPremium(s, kind, lots)
+  if (premium > s.cash) return `Buying ${lots} ${kind} lot${lots > 1 ? 's' : ''} costs ${formatRupees(premium)} in premium but you only have ${formatRupees(s.cash)} cash. Sell some stocks first, or keep cash aside before buying stocks.`
+  return null
+}
+
+/** Buy (lots > 0) or sell (lots < 0) option lots. Options are so liquid the player cannot move their price. */
+export function tradeOption(s: SimState, kind: OptionKind, lots: number, label?: string): SimState {
+  if (optionTradeProblem(s, kind, lots) !== null || lots === 0) return s
+  const premium = optionPremium(s, kind, lots)
   const verb = lots > 0 ? 'Bought' : 'Sold'
   const n = Math.abs(lots)
   const ev: MarketEvent = {

@@ -3,6 +3,7 @@ import { TICKS } from '../sim/clock'
 import {
   buyStocks,
   createState,
+  optionTradeProblem,
   sellStocks,
   step,
   tradeOption,
@@ -26,6 +27,9 @@ export interface GameStore {
   buy: (rupees: number, label?: string) => void
   sell: (rupees: number, label?: string) => void
   option: (kind: OptionKind, lots: number, label?: string) => void
+  /** Why the last action was refused, if it was. */
+  notice: string | null
+  clearNotice: () => void
 }
 
 /** Each game (guided replay, sandbox) gets its own store so they never interfere. */
@@ -36,7 +40,9 @@ export function createGameStore(opts: SimOptions, seed?: number) {
     rng: newRng(),
     playing: false,
     speed: 250,
-    reset: () => set({ state: createState(opts), rng: newRng(), playing: false }),
+    notice: null,
+    clearNotice: () => set({ notice: null }),
+    reset: () => set({ state: createState(opts), rng: newRng(), playing: false, notice: null }),
     tick: () => {
       const { state, rng } = get()
       if (state.tick >= TICKS) return set({ playing: false })
@@ -50,8 +56,23 @@ export function createGameStore(opts: SimOptions, seed?: number) {
     },
     setPlaying: (playing) => set({ playing }),
     setSpeed: (speed) => set({ speed }),
-    buy: (rupees, label) => set({ state: buyStocks(get().state, rupees, label) }),
-    sell: (rupees, label) => set({ state: sellStocks(get().state, rupees, label) }),
-    option: (kind, lots, label) => set({ state: tradeOption(get().state, kind, lots, label) }),
+    buy: (rupees, label) => {
+      const s = get().state
+      if (s.settled) return set({ notice: 'The day is over. Press Reset to play again.' })
+      if (s.cash < 1) return set({ notice: 'No cash left. Sell some stocks to free up money.' })
+      set({ state: buyStocks(s, rupees, label), notice: null })
+    },
+    sell: (rupees, label) => {
+      const s = get().state
+      if (s.settled) return set({ notice: 'The day is over. Press Reset to play again.' })
+      if (s.units < 1e-9) return set({ notice: 'You do not own any stocks to sell.' })
+      set({ state: sellStocks(s, rupees, label), notice: null })
+    },
+    option: (kind, lots, label) => {
+      const s = get().state
+      const problem = optionTradeProblem(s, kind, lots)
+      if (problem) return set({ notice: problem })
+      set({ state: tradeOption(s, kind, lots, label), notice: null })
+    },
   }))
 }
